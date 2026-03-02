@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Context path="/MyServletProject">
+  <Resource auth="Container" driverClassName="org.postgresql.Driver" maxIdle="10" maxTotal="2" maxWaitMillis="1000" name="jdbc/postgres-pool" password="!3postgreSql3!" type="javax.sql.DataSource" url="jdbc:postgresql://localhost:5432/my_test_db" username="postgres"/>
+</Context>
