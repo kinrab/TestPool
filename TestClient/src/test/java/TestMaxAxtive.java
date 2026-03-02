@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.stream.*;
 import java.io.IOException;
 
-public class JUnit_TestMaxAxtive 
+public class TestMaxAxtive 
 {
 
     @Test
