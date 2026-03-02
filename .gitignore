@@ -12,6 +12,7 @@
 
 # Package Files #
 !apache_tomcat_9_0_115.zip
+!postgresql-42.7.10.jar
 *.jar
 *.war
 *.nar
