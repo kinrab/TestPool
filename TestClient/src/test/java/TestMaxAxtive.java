@@ -95,7 +95,21 @@ public class TestMaxAxtive
             return futures.stream().map(CompletableFuture::join).collect(Collectors.toList());
         });
 
-        // ШАГ 2: Логирование в отчет Allure
+        
+        // ШАГ 2: Детальный отчет
+        Allure.step("2. Формирование детального отчета по запросам", () -> {
+            System.out.println("\n======= Detail report =======");
+            for (int i = 0; i < results.size(); i++) {
+                TestResult r = results.get(i);
+                String logLine = String.format("Request #%d | Start on %d sec | Duration %d sec | Status: %d", 
+                                                (i + 1), r.startOffset, r.duration, r.code);
+                System.out.println(logLine);
+                // Добавляем строчку лога прямо в Allure как вложение или текст
+                Allure.addAttachment("Request " + (i+1), logLine);
+            }
+        });
+        
+        // ШАГ 3: Логирование в отчет Allure
         Allure.step("Проверка результатов (Assertions)", () -> 
         {  
             long startedAtStart = results.stream().filter(r -> r.startOffset <= 1).count();
