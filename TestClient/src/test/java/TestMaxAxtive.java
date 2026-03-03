@@ -62,7 +62,7 @@ public class TestMaxAxtive
         String url = "http://localhost:8080/MyServletProject/MyServlet";
         
         Instant testStart = Instant.now();
-        System.out.println(">>> Start of test... Run requests to servlet...");
+        System.out.println("\n>>> Start of test... Run requests to servlet...");
 
         // 3. Запускаем 4 задачи параллельно
      
