@@ -1,5 +1,8 @@
 
+import java.io.File;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import java.net.http.*;
 import java.net.URI;
 import java.time.Duration;
@@ -11,10 +14,47 @@ import java.io.IOException;
 
 public class TestMaxAxtive 
 {
+    private static final int TOMCAT_STARTUP_TIMEOUT_MS = 10000; // Константа для времени ожидания запуска (10 секунд)
+    private static final int TOMCAT_SHUTDOWN_TIMEOUT_MS = 3000; // Константа для времени ожидания остановки (3 секунды)
+    
+    // Поднимаемся на уровень выше из TestClient и заходим в tomcat/bin
+    private final String TOMCAT_BIN = System.getProperty("user.dir")  + File.separator + ".." + File.separator + "tomcat" + File.separator + "bin";
 
+    @BeforeEach
+    void startTomcat() throws IOException, InterruptedException 
+    {
+        System.out.println("Run Tomcat from: " + TOMCAT_BIN);
+        
+        ProcessBuilder pb = new ProcessBuilder("cmd", "/c", "startup.bat");
+        pb.directory(new File(TOMCAT_BIN)); // Указываем рабочую директорию для процесса
+        pb.start();
+        
+        Thread.sleep(TOMCAT_STARTUP_TIMEOUT_MS); // Пауза на развертывание
+    }
+
+    @AfterEach
+    void stopTomcat() throws IOException, InterruptedException  
+    {
+        System.out.println("Stop Tomcat...");
+        
+        ProcessBuilder pb = new ProcessBuilder("cmd", "/c", "shutdown.bat");
+        pb.directory(new File(TOMCAT_BIN));
+        pb.start();
+
+        Thread.sleep(TOMCAT_SHUTDOWN_TIMEOUT_MS);  // Пауза на завершение работы
+    }
+
+    
+    
+    
     @Test
     public void testPostgresPool() 
     {
+        // 0. Нужно запустить TomCat отталкиваясь от текущей директории - нужно поднять в папке workspace Jenkins:
+        // нам понадобится класс ProcessBuilder для запуска внешних процессов.
+        
+        
+        
         // 1. Создаем клиента
         HttpClient client = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(20)).build();
         
@@ -79,7 +119,11 @@ public class TestMaxAxtive
                        );
         
         System.out.println("==============================\n");
-    }
+        
+        // 6. Нужно остановить TomCat отталкиваясь от текущей директории - нужно поднять в папке workspace Jenkins:
+        
+        
+    }   // Закончился тест testPostgresPool() 
     
 } // End of class
 
