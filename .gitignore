@@ -12,6 +12,7 @@
 
 # Package Files #
 !apache_tomcat_9_0_115.zip
+!allure.properties
 *.jar
 *.war
 *.nar
