@@ -96,39 +96,35 @@ public class TestMaxAxtive
         });
 
         // ШАГ 2: Логирование в отчет Allure
-        Allure.step("2. Формирование детального отчета по запросам", () -> 
-        {
-            System.out.println("\n======= Detail report =======");
-            for (int i = 0; i < results.size(); i++) 
-            {
-                TestResult r = results.get(i);
-                String logLine = String.format("Request #%d | Start on %d sec | Duration %d sec | Status: %d", (i + 1), r.startOffset, r.duration, r.code);
-                System.out.println(logLine);
-            
-                // Добавляем строчку лога прямо в Allure как вложение или текст
-                Allure.addAttachment("Request " + (i+1), logLine);
-            }
+        Allure.step("Проверка результатов (Assertions)", () -> 
+        {  
+            long startedAtStart = results.stream().filter(r -> r.startOffset <= 1).count();
+            long okCount = results.stream().filter(r -> r.code == 200).count();
+            long fastRequests = results.stream().filter(r -> r.duration >= 4 && r.duration <= 6).count();
+            long delayedRequests = results.stream().filter(r -> r.duration >= 9 && r.duration <= 11).count();
+
+            // Каждая проверка отдельный вложенный шаг:
+            Allure.step("Проверка: Все потоки стартовали одновременно", () -> 
+                assertEquals(4L, startedAtStart, "Все должны стартовать в начале!")
+            );
+
+            Allure.step("Проверка: Все 4 ответа имеют статус 200", () -> 
+                assertEquals(4L, okCount, "Все 4 должны быть OK")
+            );
+
+            Allure.step("Проверка: Ровно 2 быстрых запроса (5 сек)", () -> 
+                assertEquals(2L, fastRequests, "Должно быть 2 быстрых запроса")
+            );
+
+            Allure.step("Проверка: Ровно 2 задержанных запроса (10 сек)", () -> 
+                assertEquals(2L, delayedRequests, "Должно быть 2 задержанных запроса")
+            );
         });
-     
+        
         System.out.println("==============================\n");
 
         // 3. Проверки (Assertions) - их тоже можно обернуть в шаг для красоты отчета
-        Allure.step("3. Проверка результатов (Assertions)", () -> 
-        {
-            long startedAtStart = results.stream().filter(r -> r.startOffset <= 1).count();
-            assertEquals(4L, startedAtStart, "Все должны стартовать в начале!");
 
-            long okCount = results.stream().filter(r -> r.code == 200).count();
-            assertEquals(4L, okCount, "Все 4 должны быть OK");
-
-            long fastRequests = results.stream().filter(r -> r.duration >= 4 && r.duration <= 6).count();
-            assertEquals(2L, fastRequests, "Должно быть 2 быстрых запроса");
-
-            long delayedRequests = results.stream().filter(r -> r.duration >= 9 && r.duration <= 11).count();
-            assertEquals(2L, delayedRequests, "Должно быть 2 задержанных запроса");
-
-            System.out.println(">>> Final report: OK: " + okCount + ", Errors: " + (results.size() - okCount));
-        });
     }
 
 } // End of class TestMaxAxtive
