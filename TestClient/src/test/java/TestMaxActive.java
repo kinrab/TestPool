@@ -95,10 +95,24 @@ public class TestMaxActive
         }
     }
     
+    // Проверяем, есть ли папка tomcat прямо в текущей директории (как в Jenkins) Или она на уровень выше (как в NetBeans)
+    // При запуске из среды она внутри TestClient
+    private String getTomcatPath() 
+    {
+        File localTomcat = new File(System.getProperty("user.dir") + File.separator + "tomcat");
+        if (localTomcat.exists()) 
+        {
+            return localTomcat.getAbsolutePath();
+        }
+        return new File(System.getProperty("user.dir") + File.separator + ".." + File.separator + "tomcat").getAbsolutePath();
+    }
+
+
     // Константы для запуска и остановки TomCat:
     private static final int TOMCAT_STARTUP_TIMEOUT_MS = 10000;
     private static final int TOMCAT_SHUTDOWN_TIMEOUT_MS = 3000;
-    private final String TOMCAT_BIN = System.getProperty("user.dir") + File.separator + ".." + File.separator + "tomcat" + File.separator + "bin";
+    private final String TOMCAT_HOME = getTomcatPath();
+    private final String TOMCAT_BIN = TOMCAT_HOME + File.separator + "bin";
 
     // Отказываемся от этого элемента  @BeforeEach так как нам нужно иметь доступ к параметрами каждого теста.
     // Метод запуска TomCat:
@@ -122,6 +136,8 @@ public class TestMaxActive
         Thread.sleep(TOMCAT_SHUTDOWN_TIMEOUT_MS);
     }
 
+    
+    
     // Метод который обновляет параметры MAxActive и MaxWaitMillis в context.xml перед стартом TomCat: 
     private void updateContextXml(TestConfig config) throws Exception 
     {
