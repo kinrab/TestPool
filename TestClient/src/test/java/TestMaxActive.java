@@ -73,10 +73,13 @@ public class TestMaxActive
     private static final List<TestConfig> SCENARIOS = 
             List.of(
                         //                Имя,                                                             MaxActive,       MaxWait,   Sleep,  Threads, ExpOk, ExpFast, ExpDelayed  ExpError
-                          new TestConfig("Normal Wait  All:4 MaxAct:2 OK:4 Fast:2 Delay:2 Error:0",          2,           10000,      5000,     4,     4L,     2L,      2L,          0L   ), 
-                          new TestConfig("Timeout Fail All:4 MaxAct:2 Ok:2 Fast:2 Delay:0 Error:2",          2,            3000,      5000,     4,     2L,     2L,      0L,          2L   ),
-                          new TestConfig("HARD LIMIT (MaxAct:1)",                                            1,            30000,     5000,     4,     4L,     1L,      3L,          0L   ) 
-                   );
+                          //new TestConfig("Normal Wait  All:4  MaxAct:2  OK:4 Fast:2 Delay:2 Error:0",           2,            10000,      5000,     4,       4L,     2L,      2L,          0L   ), 
+                          //new TestConfig("Timeout Fail All:4  MaxAct:2  Ok:2 Fast:2 Delay:0 Error:2",           2,             3000,      5000,     4,       2L,     2L,      0L,          2L   ),
+                          //new TestConfig("Stairway     All:4  MaxAct:2  OK:4 Fast:1 Delay:3 Error:0",           1,            30000,      5000,     4,       4L,     1L,      3L,          0L   ),                        
+                          //new TestConfig("Fast timeout All:4  MaxAct:2  OK:2 Fast:2 Delay:0 Error:2",           2,              100,      5000,     4,       2L,     2L,      0L,          2L   ),                        
+                          //new TestConfig("Wide gateway All:4  MaxAct:10 OK:4 Fast:4 Delay:0 Error:0",          10,           100000,      5000,     4,       4L,     4L,      0L,          0L   ),
+                          new TestConfig("Stairway 10    All:10 MaxAct:2  OK:6 Fast:2 Delay:4 Error:4",           2,            14000,      5000,     10,      6L,     2L,      4L,          4L   ) 
+                   ); 
     
     // Класс для хранения результатов теста:
     static class TestResult 
@@ -141,6 +144,8 @@ public class TestMaxActive
     // Метод который обновляет параметры MAxActive и MaxWaitMillis в context.xml перед стартом TomCat: 
     private void updateContextXml(TestConfig config) throws Exception 
     {
+        int N = config.threads; // Вместо жесткого кодирования будем забирать из набора параметров теста.
+        
         // 1. Собираем путь к файлу (на уровень выше от bin, в папку conf) -> "tomcat\conf\context.xml" будем править главный конфиг TomCat - он имеет приоритет!   
         String contextPath = TOMCAT_BIN + File.separator + ".." + File.separator + "conf" + File.separator + "context.xml";
 
@@ -223,7 +228,8 @@ public class TestMaxActive
     
     public void testPostgresPool(TestConfig testScenarioParameters) throws Exception 
     {
-        int N = 4;
+        int N = testScenarioParameters.threads; // Будем забирвать количество потоков для запуска из параметров теста!
+        
         HttpClient client = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(20)).build();
         String url = "http://localhost:8080/MyServletProject/MyServlet";
 
