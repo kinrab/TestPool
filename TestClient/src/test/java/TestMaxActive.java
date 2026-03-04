@@ -72,13 +72,15 @@ public class TestMaxActive
     // Реальные значения параметров для наших тестов - если нужно добавить новых тестов просто здесь заполняем ноые строки:
     private static final List<TestConfig> SCENARIOS = 
             List.of(
-                        //                Имя,                                                             MaxActive,       MaxWait,   Sleep,  Threads, ExpOk, ExpFast, ExpDelayed  ExpError
-                          //new TestConfig("Normal Wait  All:4  MaxAct:2  OK:4 Fast:2 Delay:2 Error:0",           2,            10000,      5000,     4,       4L,     2L,      2L,          0L   ), 
-                          //new TestConfig("Timeout Fail All:4  MaxAct:2  Ok:2 Fast:2 Delay:0 Error:2",           2,             3000,      5000,     4,       2L,     2L,      0L,          2L   ),
-                          //new TestConfig("Stairway     All:4  MaxAct:2  OK:4 Fast:1 Delay:3 Error:0",           1,            30000,      5000,     4,       4L,     1L,      3L,          0L   ),                        
-                          //new TestConfig("Fast timeout All:4  MaxAct:2  OK:2 Fast:2 Delay:0 Error:2",           2,              100,      5000,     4,       2L,     2L,      0L,          2L   ),                        
-                          //new TestConfig("Wide gateway All:4  MaxAct:10 OK:4 Fast:4 Delay:0 Error:0",          10,           100000,      5000,     4,       4L,     4L,      0L,          0L   ),
-                          new TestConfig("Stairway 10    All:10 MaxAct:2  OK:6 Fast:2 Delay:4 Error:4",           2,            14000,      5000,     10,      6L,     2L,      4L,          4L   ) 
+                    //                Имя,                                                                                        MaxActive,       MaxWait,     Sleep,  Threads,    ExpOk,    ExpFast,   ExpDelayed  ExpError
+                    new TestConfig("Normal Wait   All: 4  MaxAct:2  OK:4 Fast:2 Delay:2 Error:0 MaxWait:  10000 Sleep:5000",           2,            10000,      5000,     4,         4L,       2L,          2L,       0L   ), 
+                    new TestConfig("Timeout Fail  All: 4  MaxAct:2  Ok:2 Fast:2 Delay:0 Error:2 MaxWait:   3000 Sleep:5000",           2,             3000,      5000,     4,         2L,       2L,          0L,       2L   ),
+                    new TestConfig("Stairway      All: 4  MaxAct:2  OK:4 Fast:1 Delay:3 Error:0 MaxWait:  30000 Sleep:5000",           1,            30000,      5000,     4,         4L,       1L,          3L,       0L   ),                        
+                    new TestConfig("Fast timeout  All: 4  MaxAct:2  OK:2 Fast:2 Delay:0 Error:2 MaxWait:    100 Sleep:5000",           2,              100,      5000,     4,         2L,       2L,          0L,       2L   ),                        
+                    new TestConfig("Wide gateway  All: 4  MaxAct:10 OK:4 Fast:4 Delay:0 Error:0 MaxWait: 100000 Sleep:5000",          10,           100000,      5000,     4,         4L,       4L,          0L,       0L   ),
+                    new TestConfig("Stairway 10   All:10  MaxAct:2  OK:6 Fast:2 Delay:4 Error:4 MaxWait:  14000 Sleep:5000",           2,            14000,      5000,     10,        6L,       2L,          4L,       4L   ), 
+                    new TestConfig("Border   10   All:10  MaxAct:2  OK:6 Fast:2 Delay:4 Error:4 MaxWait:  15000 Sleep:5000",           2,            15000,      5000,     10,        6L,       2L,          4L,       4L   ) 
+                          // Тут в Border граничные условия - таймаут 15 и успеют ли освободившиеся конекшены подхватиться или таймаут истечет? Вроде истекает таймаут.
                    ); 
     
     // Класс для хранения результатов теста:
@@ -98,7 +100,7 @@ public class TestMaxActive
         }
     }
     
-    // Проверяем, есть ли папка tomcat прямо в текущей директории (как в Jenkins) Или она на уровень выше (как в NetBeans)
+    // Проверяем, есть ли папка tomcat прямо в текущей директории (как в Jenkins) или как в NetBeans)
     // При запуске из среды она внутри TestClient
     private String getTomcatPath() 
     {
@@ -222,21 +224,21 @@ public class TestMaxActive
     @Story("MaxActive limit check")
     @Description("Проверка очереди Tomcat: запроса сразу, и в ожидании.")
     
-    // 2. Параметризованный запуск
+    // Параметризованный запуск
     @ParameterizedTest(name = "{0}")
     @MethodSource("getScenarios")
     
     public void testPostgresPool(TestConfig testScenarioParameters) throws Exception 
     {
-        int N = testScenarioParameters.threads; // Будем забирвать количество потоков для запуска из параметров теста!
+        int N = testScenarioParameters.threads; // Будем забирать количество потоков для запуска из параметров теста!
         
         HttpClient client = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(20)).build();
         String url = "http://localhost:8080/MyServletProject/MyServlet";
 
         System.out.println("\n>>> Start of test... Run requests to servlet...");
 
-        // Добавим очистку директория work в TomCat чтобы гарантировать чтение параметров из context.xml
-        Allure.step("Очистка кэша Tomcat (work & temp)", () -> 
+        //Шаг 1: Добавим очистку директория work в TomCat чтобы гарантировать чтение параметров из context.xml
+        Allure.step("1. Очистка кэша Tomcat (work & temp)", () -> 
         {
         File workDir = new File(TOMCAT_BIN + "/../work");
         File tempDir = new File(TOMCAT_BIN + "/../temp");
@@ -249,15 +251,15 @@ public class TestMaxActive
 
         
         
-        // Шаг 0. Перед тестом заполним правильными значениями MAxActive и MaxWaitMillis
-        Allure.step("0. Подготовка: Установка параметров пула (maxTotal=" + testScenarioParameters.maxActive + ", maxWait=" + testScenarioParameters.maxWait + ")", () -> 
+        // Шаг 2. Перед тестом заполним правильными значениями MAxActive и MaxWaitMillis
+        Allure.step("2. Подготовка: Установка параметров пула (maxTotal=" + testScenarioParameters.maxActive + ", maxWait=" + testScenarioParameters.maxWait + ")", () -> 
         {
             updateContextXml(testScenarioParameters);
         });
 
         
-        // Шаг 1: Запустим TomCat:
-        Allure.step("1. Запуск Tomcat", () -> 
+        // Шаг 3: Запустим TomCat:
+        Allure.step("3. Запуск Tomcat", () -> 
         {
             startTomcat();
         });
@@ -266,8 +268,8 @@ public class TestMaxActive
         Instant testStart = Instant.now(); 
         System.out.println("\n>>> Запуск нагрузки (Time start: 0s)");
 
-        // ШАГ 2. ЗАПУСКАЕМ N потоков с HTTP-запросом GET:
-        List<TestResult> results = Allure.step("2. Отправка " + N + " параллельных запросов к сервлету", () -> 
+        // ШАГ 4. ЗАПУСКАЕМ N потоков с HTTP-запросом GET:
+        List<TestResult> results = Allure.step("4. Отправка " + N + " параллельных запросов к сервлету", () -> 
         {
             List<CompletableFuture<TestResult>> futures = IntStream.rangeClosed(1, N) // Т - число запускаемых клиентских запросов (фич / потоков)
                 .mapToObj(id -> CompletableFuture.supplyAsync
@@ -307,25 +309,39 @@ public class TestMaxActive
             return futures.stream().map(CompletableFuture::join).collect(Collectors.toList());
         });
 
-        //Шаг 3: Останавливаем TomCat:
-        stopTomcat();
+        //Шаг 5: Останавливаем TomCat:
+        Allure.step("5. Остановка Tomcat", () -> 
+        {
+            stopTomcat();
+        });
         
         
-        // ШАГ 4: Формируем детальный отчет:
-        Allure.step("4. Формирование детального отчета по запросам", () -> {
+        // ШАГ 6: Формируем детальный отчет:
+        Allure.step("6. Формирование детального отчета по запросам", () -> 
+        {
+            int Error = 0;
             System.out.println("\n======= Detail report =======");
-            for (int i = 0; i < results.size(); i++) {
+            for (int i = 0; i < results.size(); i++) 
+            {
                 TestResult r = results.get(i);
-                String logLine = String.format("Request #%d | Start on %d sec | Duration %d sec | Status: %d", 
-                                                (i + 1), r.startOffset, r.duration, r.code);
+                // Проверим были ли sql ошибки в response (то есть отвалился ли поток по таймауту?):
+                if (r.body.contains("SQL query execution error")== true)
+                {
+                    Error = 1;                    
+                }
+                else
+                    Error = 0;
+                
+                String logLine = String.format("Request #%d | Start on %d sec | Duration %d sec | StatusHttp: %d | TimeoutError: %d | MaxWait: %d | Sleep: %d ", 
+                                               (i + 1), r.startOffset, r.duration, r.code, Error, testScenarioParameters.maxWait, testScenarioParameters.clientSleep);
                 System.out.println(logLine);
                 // Добавляем строчку лога прямо в Allure как вложение или текст
                 Allure.addAttachment("Request " + (i+1), logLine);
             }
         });
         
-        // ШАГ 5: Логирование в отчет Allure и универсальные проверки Asserts
-        Allure.step("Проверка результатов (Assertions)", () -> 
+        // ШАГ 7: Логирование в отчет Allure и универсальные проверки Asserts
+        Allure.step("7. Проверка результатов (Assertions)", () -> 
         {
             // 0. ОБЪЯВЛЯЕМ переменные в начале блока, чтобы их видели все вложенные шаги
             final long sleep = testScenarioParameters.clientSleep / 1000; 
@@ -342,11 +358,11 @@ public class TestMaxActive
                 .count();
 
             // 3. Проверка количества
-            Allure.step("Проверка: Успешных ответов с данными (ожидаем " + testScenarioParameters.expectedOk + ")", () -> 
+            Allure.step("7.1 Проверка: Успешных ответов с данными (ожидаем " + testScenarioParameters.expectedOk + ")", () -> 
                 assertEquals(testScenarioParameters.expectedOk, realOkCount, "Кол-во чистых 200 не совпало!")
             );
 
-            Allure.step("Проверка: Отвалов пула (ожидаем " + testScenarioParameters.expectedError + ")", () -> 
+            Allure.step("7.2 Проверка: Отвалов пула (ожидаем " + testScenarioParameters.expectedError + ")", () -> 
                 assertEquals(testScenarioParameters.expectedError, realErrorCount, "Ожидаемые ошибки не найдены в ответах!")
             );
 
@@ -363,7 +379,7 @@ public class TestMaxActive
                 int wave = i / maxActive; 
                 long expectedDuration = sleep * (wave + 1);
 
-                Allure.step("Проверка запроса в волне #" + (wave + 1) + " (ожидаем ~" + expectedDuration + "с)", () -> 
+                Allure.step("7.3 Проверка запроса в волне #" + (wave + 1) + " (ожидаем ~" + expectedDuration + "с)", () -> 
                 {
                     long actualDuration = sortedOkResults.get(requestIndex).duration;
                     assertTrue(Math.abs(actualDuration - expectedDuration) <= 1, 
