@@ -155,7 +155,7 @@ public class TestMaxActive
 
         // 2. Создаем указатель на файл:
         File xmlFile = new File(contextPath);            
-        System.out.println(">>> [CONFIG] Читаем файл: " + xmlFile.getCanonicalPath());   //полный абсолютный путь  xmlFile.getCanonicalPath()
+        System.out.println(">>> [CONFIG] Read file: " + xmlFile.getCanonicalPath());   //полный абсолютный путь  xmlFile.getCanonicalPath()
 
         // 3. Инициализируем XML-парсер
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -188,7 +188,7 @@ public class TestMaxActive
         // Проверяем были ли изменены параметры или мы их не нашли? 
         if (!isUpdated) 
         {
-            throw new RuntimeException("Error: В context.xml не найден Resource для PostgreSQL!");
+            throw new RuntimeException("Error: In the context.xml tag Resource is not found (for PostgreSQL)!");
         }
 
         // 4. Сохраняем изменения обратно в файл
@@ -207,7 +207,7 @@ public class TestMaxActive
         // 7. Даем ОС микро-паузу (500 мс), чтобы закрыть все дескрипторы файла
         Thread.sleep(500); 
                 
-        System.out.println(">>> [CONFIG] Успешно установлены: maxTotal = " + config.maxActive + ", maxWaitMillis = " + config.maxWait);
+        System.out.println(">>> [CONFIG] Parameters has been updated successfully: maxTotal = " + config.maxActive + ", maxWaitMillis = " + config.maxWait);
         
     } // End of UpdateContextXml
     
@@ -238,7 +238,7 @@ public class TestMaxActive
         System.out.println("\n>>> Start of test... Run requests to servlet...");
 
         //Шаг 1: Добавим очистку директория work в TomCat чтобы гарантировать чтение параметров из context.xml
-        Allure.step("1. Очистка кэша Tomcat (work & temp)", () -> 
+        Allure.step("1. Clean  Tomcat's cash (work & temp)", () -> 
         {
         File workDir = new File(TOMCAT_BIN + "/../work");
         File tempDir = new File(TOMCAT_BIN + "/../temp");
@@ -246,30 +246,30 @@ public class TestMaxActive
         if (workDir.exists()) deleteDirectory(workDir);
         if (tempDir.exists()) deleteDirectory(tempDir);
 
-        System.out.println(">>> [CLEANUP] Папки work и temp удалены.");
+        System.out.println(">>> [CLEANUP] Direstories work and temp were cleaned.");
         });
 
         
         
         // Шаг 2. Перед тестом заполним правильными значениями MAxActive и MaxWaitMillis
-        Allure.step("2. Подготовка: Установка параметров пула (maxTotal=" + testScenarioParameters.maxActive + ", maxWait=" + testScenarioParameters.maxWait + ")", () -> 
+        Allure.step("2. Preparation: pool parameters setup (maxTotal=" + testScenarioParameters.maxActive + ", maxWait=" + testScenarioParameters.maxWait + ")", () -> 
         {
             updateContextXml(testScenarioParameters);
         });
 
         
         // Шаг 3: Запустим TomCat:
-        Allure.step("3. Запуск Tomcat", () -> 
+        Allure.step("3. Start Tomcat", () -> 
         {
             startTomcat();
         });
         
         // ВОТ ЗДЕСЬ ОБНУЛЯЕМ ТАЙМЕР:
         Instant testStart = Instant.now(); 
-        System.out.println("\n>>> Запуск нагрузки (Time start: 0s)");
+        System.out.println("\n>>> Test run (Time start: 0s)");
 
         // ШАГ 4. ЗАПУСКАЕМ N потоков с HTTP-запросом GET:
-        List<TestResult> results = Allure.step("4. Отправка " + N + " параллельных запросов к сервлету", () -> 
+        List<TestResult> results = Allure.step("4. Executing of  " + N + " parallel requests to servlet", () -> 
         {
             List<CompletableFuture<TestResult>> futures = IntStream.rangeClosed(1, N) // Т - число запускаемых клиентских запросов (фич / потоков)
                 .mapToObj(id -> CompletableFuture.supplyAsync
@@ -310,14 +310,14 @@ public class TestMaxActive
         });
 
         //Шаг 5: Останавливаем TomCat:
-        Allure.step("5. Остановка Tomcat", () -> 
+        Allure.step("5. Stop Tomcat", () -> 
         {
             stopTomcat();
         });
         
         
         // ШАГ 6: Формируем детальный отчет:
-        Allure.step("6. Формирование детального отчета по запросам", () -> 
+        Allure.step("6. Detail repost preparation...", () -> 
         {
             int Error = 0;
             System.out.println("\n======= Detail report =======");
@@ -341,7 +341,7 @@ public class TestMaxActive
         });
         
         // ШАГ 7: Логирование в отчет Allure и универсальные проверки Asserts
-        Allure.step("7. Проверка результатов (Assertions)", () -> 
+        Allure.step("7. Results checking (Assertions)", () -> 
         {
             // 0. ОБЪЯВЛЯЕМ переменные в начале блока, чтобы их видели все вложенные шаги
             final long sleep = testScenarioParameters.clientSleep / 1000; 
@@ -388,7 +388,7 @@ public class TestMaxActive
             }
         }); // Конец главного Allure.step
         
-        System.out.println("============ Усе готово. Фас... Профиль... Отпечатки пальцев... :-) ==================\n");
+        System.out.println("============ All steps have been completed. Wow! :-) ==================\n");
 
     } // End of test 
     
