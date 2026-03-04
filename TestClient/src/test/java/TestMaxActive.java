@@ -73,9 +73,9 @@ public class TestMaxActive
     private static final List<TestConfig> SCENARIOS = 
             List.of(
                         //                Имя,                                                             MaxActive,       MaxWait,   Sleep,  Threads, ExpOk, ExpFast, ExpDelayed  ExpError
-                          //new TestConfig("Normal Wait  All:4 MaxAct:2 OK:4 Fast:2 Delay:2 Error:0",          2,           10000,      5000,     4,     4L,     2L,      2L,          0L   ) 
-                          new TestConfig("Timeout Fail All:4 MaxAct:2 Ok:2 Fast:2 Delay:0 Error:2",            2,            3000,      5000,     4,     2L,     2L,      0L,          2L   ) 
-                          //new TestConfig("HARD LIMIT (MaxAct:1)",                                            1,            30000,     5000,     4,     4L,     1L,      3L,          0L   ) 
+                          new TestConfig("Normal Wait  All:4 MaxAct:2 OK:4 Fast:2 Delay:2 Error:0",          2,           10000,      5000,     4,     4L,     2L,      2L,          0L   ), 
+                          new TestConfig("Timeout Fail All:4 MaxAct:2 Ok:2 Fast:2 Delay:0 Error:2",          2,            3000,      5000,     4,     2L,     2L,      0L,          2L   ),
+                          new TestConfig("HARD LIMIT (MaxAct:1)",                                            1,            30000,     5000,     4,     4L,     1L,      3L,          0L   ) 
                    );
     
     // Класс для хранения результатов теста:
@@ -214,31 +214,31 @@ public class TestMaxActive
         System.out.println("\n>>> Start of test... Run requests to servlet...");
 
         // Добавим очистку директория work в TomCat чтобы гарантировать чтение параметров из context.xml
-//       Allure.step("Очистка кэша Tomcat (work & temp)", () -> 
-//       {
-//       File workDir = new File(TOMCAT_BIN + "/../work");
-//       File tempDir = new File(TOMCAT_BIN + "/../temp");
-//
-//       if (workDir.exists()) deleteDirectory(workDir);
-//       if (tempDir.exists()) deleteDirectory(tempDir);
-//
-//       System.out.println(">>> [CLEANUP] Папки work и temp удалены.");
-//        });
+        Allure.step("Очистка кэша Tomcat (work & temp)", () -> 
+        {
+        File workDir = new File(TOMCAT_BIN + "/../work");
+        File tempDir = new File(TOMCAT_BIN + "/../temp");
+
+        if (workDir.exists()) deleteDirectory(workDir);
+        if (tempDir.exists()) deleteDirectory(tempDir);
+
+        System.out.println(">>> [CLEANUP] Папки work и temp удалены.");
+        });
 
         
         
         // Шаг 0. Перед тестом заполним правильными значениями MAxActive и MaxWaitMillis
-//        Allure.step("0. Подготовка: Установка параметров пула (maxTotal=" + testScenarioParameters.maxActive + ", maxWait=" + testScenarioParameters.maxWait + ")", () -> 
-//        {
-//            updateContextXml(testScenarioParameters);
-//        });
+        Allure.step("0. Подготовка: Установка параметров пула (maxTotal=" + testScenarioParameters.maxActive + ", maxWait=" + testScenarioParameters.maxWait + ")", () -> 
+        {
+            updateContextXml(testScenarioParameters);
+        });
 
         
         // Шаг 1: Запустим TomCat:
-//        Allure.step("1. Запуск Tomcat", () -> 
-//        {
-//            startTomcat();
-//        });
+        Allure.step("1. Запуск Tomcat", () -> 
+        {
+            startTomcat();
+        });
         
         // ВОТ ЗДЕСЬ ОБНУЛЯЕМ ТАЙМЕР:
         Instant testStart = Instant.now(); 
@@ -286,7 +286,7 @@ public class TestMaxActive
         });
 
         //Шаг 3: Останавливаем TomCat:
-        //stopTomcat();
+        stopTomcat();
         
         
         // ШАГ 4: Формируем детальный отчет:
