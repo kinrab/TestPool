@@ -79,14 +79,14 @@ public class TestMaxActive
     private static final List<TestConfig> SCENARIOS = 
             List.of(
                     //                Имя,                                                                                    Number    MaxActive,       MaxWait,     Sleep,  Threads,    ExpOk,    ExpFast,   ExpDelayed  ExpError
-                    new TestConfig("Normal Wait   All: 4  MaxAct:2  OK:4 Fast:2 Delay:2 Error:0 MaxWait:  10000 Sleep:5000",    1,       2,            10000,      5000,     4,         4L,       2L,          2L,       0L   ) 
-//                    new TestConfig("Timeout Fail  All: 4  MaxAct:2  Ok:2 Fast:2 Delay:0 Error:2 MaxWait:   3000 Sleep:5000",    2,       2,             3000,      5000,     4,         2L,       2L,          0L,       2L   ),
-//                    new TestConfig("Stairway      All: 4  MaxAct:2  OK:4 Fast:1 Delay:3 Error:0 MaxWait:  30000 Sleep:5000",    3,       1,            30000,      5000,     4,         4L,       1L,          3L,       0L   ),                        
-//                    new TestConfig("Fast timeout  All: 4  MaxAct:2  OK:2 Fast:2 Delay:0 Error:2 MaxWait:    100 Sleep:5000",    4,       2,              100,      5000,     4,         2L,       2L,          0L,       2L   ),                        
-//                    new TestConfig("Wide gateway  All: 4  MaxAct:10 OK:4 Fast:4 Delay:0 Error:0 MaxWait: 100000 Sleep:5000",    5,      10,           100000,      5000,     4,         4L,       4L,          0L,       0L   ),
-//                    new TestConfig("Stairway 10   All:10  MaxAct:2  OK:6 Fast:2 Delay:4 Error:4 MaxWait:  14000 Sleep:5000",    6,       2,            14000,      5000,     10,        6L,       2L,          4L,       4L   ), 
-//                    new TestConfig("Border 10     All:10  MaxAct:2  OK:6 Fast:2 Delay:4 Error:4 MaxWait:  15000 Sleep:5000",    7,       2,            15000,      5000,     10,        6L,       2L,          4L,       4L   ),
-//                    new TestConfig("Nothing       All:10  MaxAct:0  OK:0 Fast:10 Delay:0 Error:10 MaxWait: 1000 Sleep:5000",     8,       0,             1000,      5000,     10,        0L,       10L,         0L,       10L  )
+                    new TestConfig("Normal Wait   All: 4  MaxAct:2  OK:4 Fast:2 Delay:2 Error:0 MaxWait:  10000 Sleep:5000",    1,       2,            10000,      5000,     4,         4L,       2L,          2L,       0L   ), 
+                    new TestConfig("Timeout Fail  All: 4  MaxAct:2  Ok:2 Fast:2 Delay:0 Error:2 MaxWait:   3000 Sleep:5000",    2,       2,             3000,      5000,     4,         2L,       2L,          0L,       2L   ),
+                    new TestConfig("Stairway      All: 4  MaxAct:2  OK:4 Fast:1 Delay:3 Error:0 MaxWait:  30000 Sleep:5000",    3,       1,            30000,      5000,     4,         4L,       1L,          3L,       0L   ),                        
+                    new TestConfig("Fast timeout  All: 4  MaxAct:2  OK:2 Fast:2 Delay:0 Error:2 MaxWait:    100 Sleep:5000",    4,       2,              100,      5000,     4,         2L,       2L,          0L,       2L   ),                        
+                    new TestConfig("Wide gateway  All: 4  MaxAct:10 OK:4 Fast:4 Delay:0 Error:0 MaxWait: 100000 Sleep:5000",    5,      10,           100000,      5000,     4,         4L,       4L,          0L,       0L   ),
+                    new TestConfig("Stairway 10   All:10  MaxAct:2  OK:6 Fast:2 Delay:4 Error:4 MaxWait:  14000 Sleep:5000",    6,       2,            14000,      5000,     10,        6L,       2L,          4L,       4L   ), 
+                    new TestConfig("Border 10     All:10  MaxAct:2  OK:6 Fast:2 Delay:4 Error:4 MaxWait:  15000 Sleep:5000",    7,       2,            15000,      5000,     10,        6L,       2L,          4L,       4L   ),
+                    new TestConfig("Nothing       All:10  MaxAct:0  OK:0 Fast:10 Delay:0 Error:10 MaxWait: 1000 Sleep:5000",     8,       0,             1000,      5000,     10,        0L,       10L,         0L,       10L  )
 
             ); 
     
