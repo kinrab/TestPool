@@ -6,6 +6,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
 import io.qameta.allure.Description; 
+import java.io.FileNotFoundException;
 
 import java.net.http.*;
 import java.net.URI;
@@ -151,11 +152,20 @@ public class TestMaxActive
    // Метод который обновляет параметры MAxActive и MaxWaitMillis в context.xml перед стартом TomCat: 
    private void updateContextXml(TestConfig config) throws Exception
    {
-       // 1. Собираем путь к файлу (на уровень выше от bin, в папку conf) -> "tomcat\conf\context.xml" будем править главный конфиг TomCat - он имеет приоритет!   
-        String contextPath = TOMCAT_BIN + File.separator + ".." + File.separator + "conf" + File.separator + "context.xml";
-       
+        // 1. Динамическое определение пути относительно корня проекта
+        // Мы берем текущую рабочую директорию (TestClient) и идем на уровень выше к папке tomcat
+        File projectDir = new File(System.getProperty("user.dir")); // Это папка TestClient
+        File tomcatConfDir = new File(projectDir.getParentFile(), "tomcat/conf/context.xml");
+
+        String contextPath = tomcatConfDir.getCanonicalPath();
         File xmlFile = new File(contextPath);
-        System.out.println(">>> [CONFIG] Read file: " + xmlFile.getCanonicalPath());
+
+        if (!xmlFile.exists()) {
+            throw new FileNotFoundException("Critical error: File is not found: " + contextPath + 
+                ". Make sure that folder tomcat is located in the root of TestPool near to TestClient!");
+        }
+
+        System.out.println(">>> [CONFIG] Read context.xml: " + contextPath);
 
         // 2. Инициализируем XML-парсер
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
