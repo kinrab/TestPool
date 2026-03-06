@@ -147,7 +147,7 @@ public class TestMaxActive
         pb.start();
         Thread.sleep(TOMCAT_SHUTDOWN_TIMEOUT_MS);
     }
-
+ 
    
    // Метод который обновляет параметры MAxActive и MaxWaitMillis в context.xml перед стартом TomCat: 
    private void updateContextXml(TestConfig config) throws Exception
