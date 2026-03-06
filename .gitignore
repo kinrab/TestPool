@@ -27,10 +27,10 @@ replay_pid*
 tomcat/
 
 # Игнорируем результаты Allure
-TestClient/target/allure-results/
+**/allure-results/
 
 # Игнорируем стандартные отчеты Maven Surefire (логи тестов)
-TestClient/target/surefire-reports/
+**/TestClient/target/surefire-reports/
 
 # На всякий случай игнорируем всю папку target (там только временные файлы сборки)
-TestClient/target/
+**/TestClient/target/

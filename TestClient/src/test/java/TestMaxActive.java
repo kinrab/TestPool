@@ -24,6 +24,9 @@ import javax.xml.parsers.*;
 import javax.xml.transform.*;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathFactory;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
@@ -34,6 +37,7 @@ public class TestMaxActive
     {
         // Входные параметры для тестов:
         String name;                                //  Имя или цель или описание смысла выполнения теста с этими параметрами.
+        int number;                                 //  Порядковый номер теста 
         int maxActive;                              //  Значение MaxActive для текущего элемента скиска параметров. 
         long maxWait;                               //  Значение MaxWait для текущего элемента скиска параметров. Сколько ждать максимально завершения запроса HTTP в сервлет.
         long clientSleep;                           //  Значение Sleep для указания времени которое клиентский поток должен ждать освобождения коннекшена в пуле 
@@ -47,9 +51,10 @@ public class TestMaxActive
         
 
         // Конструктор класса хранения параметров нагшего теста: 
-        public TestConfig(String name, int maxActive, int maxWait, int clientSleep, int threads, long ok, long fast, long delayed,long err) 
+        public TestConfig(String name, int number, int maxActive, int maxWait, int clientSleep, int threads, long ok, long fast, long delayed,long err) 
         {
             this.name = name;
+            this.number = number;
             this.maxActive = maxActive;
             this.maxWait = maxWait;
             this.clientSleep = clientSleep;
@@ -72,16 +77,17 @@ public class TestMaxActive
     // Реальные значения параметров для наших тестов - если нужно добавить новых тестов просто здесь заполняем ноые строки:
     private static final List<TestConfig> SCENARIOS = 
             List.of(
-                    //                Имя,                                                                                        MaxActive,       MaxWait,     Sleep,  Threads,    ExpOk,    ExpFast,   ExpDelayed  ExpError
-                    new TestConfig("Normal Wait   All: 4  MaxAct:2  OK:4 Fast:2 Delay:2 Error:0 MaxWait:  10000 Sleep:5000",           2,            10000,      5000,     4,         4L,       2L,          2L,       0L   ), 
-                    new TestConfig("Timeout Fail  All: 4  MaxAct:2  Ok:2 Fast:2 Delay:0 Error:2 MaxWait:   3000 Sleep:5000",           2,             3000,      5000,     4,         2L,       2L,          0L,       2L   ),
-                    new TestConfig("Stairway      All: 4  MaxAct:2  OK:4 Fast:1 Delay:3 Error:0 MaxWait:  30000 Sleep:5000",           1,            30000,      5000,     4,         4L,       1L,          3L,       0L   ),                        
-                    new TestConfig("Fast timeout  All: 4  MaxAct:2  OK:2 Fast:2 Delay:0 Error:2 MaxWait:    100 Sleep:5000",           2,              100,      5000,     4,         2L,       2L,          0L,       2L   ),                        
-                    new TestConfig("Wide gateway  All: 4  MaxAct:10 OK:4 Fast:4 Delay:0 Error:0 MaxWait: 100000 Sleep:5000",          10,           100000,      5000,     4,         4L,       4L,          0L,       0L   ),
-                    new TestConfig("Stairway 10   All:10  MaxAct:2  OK:6 Fast:2 Delay:4 Error:4 MaxWait:  14000 Sleep:5000",           2,            14000,      5000,     10,        6L,       2L,          4L,       4L   ), 
-                    new TestConfig("Border   10   All:10  MaxAct:2  OK:6 Fast:2 Delay:4 Error:4 MaxWait:  15000 Sleep:5000",           2,            15000,      5000,     10,        6L,       2L,          4L,       4L   ) 
-                          // Тут в Border граничные условия - таймаут 15 и успеют ли освободившиеся конекшены подхватиться или таймаут истечет? Вроде истекает таймаут.
-                   ); 
+                    //                Имя,                                                                                    Number    MaxActive,       MaxWait,     Sleep,  Threads,    ExpOk,    ExpFast,   ExpDelayed  ExpError
+//                    new TestConfig("Normal Wait   All: 4  MaxAct:2  OK:4 Fast:2 Delay:2 Error:0 MaxWait:  10000 Sleep:5000",    1,       2,            10000,      5000,     4,         4L,       2L,          2L,       0L   ), 
+//                    new TestConfig("Timeout Fail  All: 4  MaxAct:2  Ok:2 Fast:2 Delay:0 Error:2 MaxWait:   3000 Sleep:5000",    2,       2,             3000,      5000,     4,         2L,       2L,          0L,       2L   ),
+//                    new TestConfig("Stairway      All: 4  MaxAct:2  OK:4 Fast:1 Delay:3 Error:0 MaxWait:  30000 Sleep:5000",    3,       1,            30000,      5000,     4,         4L,       1L,          3L,       0L   ),                        
+//                    new TestConfig("Fast timeout  All: 4  MaxAct:2  OK:2 Fast:2 Delay:0 Error:2 MaxWait:    100 Sleep:5000",    4,       2,              100,      5000,     4,         2L,       2L,          0L,       2L   ),                        
+//                    new TestConfig("Wide gateway  All: 4  MaxAct:10 OK:4 Fast:4 Delay:0 Error:0 MaxWait: 100000 Sleep:5000",    5,      10,           100000,      5000,     4,         4L,       4L,          0L,       0L   ),
+//                    new TestConfig("Stairway 10   All:10  MaxAct:2  OK:6 Fast:2 Delay:4 Error:4 MaxWait:  14000 Sleep:5000",    6,       2,            14000,      5000,     10,        6L,       2L,          4L,       4L   ), 
+//                    new TestConfig("Border 10     All:10  MaxAct:2  OK:6 Fast:2 Delay:4 Error:4 MaxWait:  15000 Sleep:5000",    7,       2,            15000,      5000,     10,        6L,       2L,          4L,       4L   ),
+                    new TestConfig("Nothing       All:10  MaxAct:0  OK:0 Fast:10 Delay:0 Error:10 MaxWait:  1000 Sleep:5000",     8,       0,             1000,      5000,     10,        0L,       10L,         0L,       10L  )
+
+            ); 
     
     // Класс для хранения результатов теста:
     static class TestResult 
@@ -141,74 +147,70 @@ public class TestMaxActive
         Thread.sleep(TOMCAT_SHUTDOWN_TIMEOUT_MS);
     }
 
-    
-    
-    // Метод который обновляет параметры MAxActive и MaxWaitMillis в context.xml перед стартом TomCat: 
-    private void updateContextXml(TestConfig config) throws Exception 
-    {
-        int N = config.threads; // Вместо жесткого кодирования будем забирать из набора параметров теста.
-        
-        // 1. Собираем путь к файлу (на уровень выше от bin, в папку conf) -> "tomcat\conf\context.xml" будем править главный конфиг TomCat - он имеет приоритет!   
+   
+   // Метод который обновляет параметры MAxActive и MaxWaitMillis в context.xml перед стартом TomCat: 
+   private void updateContextXml(TestConfig config) throws Exception
+   {
+       // 1. Собираем путь к файлу (на уровень выше от bin, в папку conf) -> "tomcat\conf\context.xml" будем править главный конфиг TomCat - он имеет приоритет!   
         String contextPath = TOMCAT_BIN + File.separator + ".." + File.separator + "conf" + File.separator + "context.xml";
+       
+        File xmlFile = new File(contextPath);
+        System.out.println(">>> [CONFIG] Read file: " + xmlFile.getCanonicalPath());
 
-
-
-        // 2. Создаем указатель на файл:
-        File xmlFile = new File(contextPath);            
-        System.out.println(">>> [CONFIG] Read file: " + xmlFile.getCanonicalPath());   //полный абсолютный путь  xmlFile.getCanonicalPath()
-
-        // 3. Инициализируем XML-парсер
+        // 2. Инициализируем XML-парсер
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = factory.newDocumentBuilder();
-        
-        // 4. Читаем содержимое файла: 
-        //    Вот здесь DBuilder (наш парсер) берет тот адрес, который мы ему дали в xmlFile, идет на диск, открывает файл, вычитывает все байты и закрывает его,
-        //    оставив у себя в памяти «дерево» (объект doc).
         Document doc = builder.parse(xmlFile);
 
-        // 3. Ищем все теги <Resource> и меняем значения на наши из переметров теста:
+        // 3. Ищем теги <Resource> и обновляем атрибуты
         NodeList resources = doc.getElementsByTagName("Resource");
         boolean isUpdated = false;
 
-        for (int i = 0; i < resources.getLength(); i++) 
-        {
+        for (int i = 0; i < resources.getLength(); i++) {
             Element resource = (Element) resources.item(i);
+            if (resource.getAttribute("driverClassName").contains("postgresql") || 
+                resource.getAttribute("name").contains("jdbc/postgres")) {
 
-            // Ищем наш ресурс по ключевому признаку (например, драйверу или имени)
-            if (resource.getAttribute("driverClassName").contains("postgresql") || resource.getAttribute("name").contains("jdbc/postgres")) 
-            {
-
-                // Записываем новые значения из нашего текущего сценария
                 resource.setAttribute("maxTotal", String.valueOf(config.maxActive));
                 resource.setAttribute("maxWaitMillis", String.valueOf(config.maxWait));
                 isUpdated = true;
             }
         }
 
-        // Проверяем были ли изменены параметры или мы их не нашли? 
-        if (!isUpdated) 
-        {
+        if (!isUpdated) {
             throw new RuntimeException("Error: In the context.xml tag Resource is not found (for PostgreSQL)!");
         }
 
+        // --- ИСПРАВЛЕНИЕ: Очистка лишних переносов строк ---
+        // Находим все текстовые узлы, которые состоят только из пробелов/переносов и удаляем их
+        XPath xPath = XPathFactory.newInstance().newXPath();
+        NodeList nodeList = (NodeList) xPath.evaluate("//text()[normalize-space()='']", doc, XPathConstants.NODESET);
+
+        for (int i = 0; i < nodeList.getLength(); ++i) {
+            Node node = nodeList.item(i);
+            node.getParentNode().removeChild(node);
+        }
+        // --------------------------------------------------
+
         // 4. Сохраняем изменения обратно в файл
-        Transformer transformer = TransformerFactory.newInstance().newTransformer();
-        
-        // 5. Добавим форматирование, чтобы XML не превратился в одну строку
+        TransformerFactory transformerFactory = TransformerFactory.newInstance();
+        Transformer transformer = transformerFactory.newTransformer();
+
+        // Настройки форматирования
         transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+        transformer.setOutputProperty("{http://xml.apache.org}indent-amount", "4");
+        // Убираем standalone="no" для чистоты
+        transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
 
         DOMSource source = new DOMSource(doc);
         StreamResult result = new StreamResult(xmlFile);
         transformer.transform(source, result);
 
-        // 6. Нужно быть уверенным, что файл на диске точно получил наши параметры: 
+        // 5. Завершение
         System.out.flush();
-        
-        // 7. Даем ОС микро-паузу (500 мс), чтобы закрыть все дескрипторы файла
         Thread.sleep(500); 
-                
-        System.out.println(">>> [CONFIG] Parameters has been updated successfully: maxTotal = " + config.maxActive + ", maxWaitMillis = " + config.maxWait);
-        
+        System.out.println(">>> [CONFIG] Parameters updated: maxTotal = " + config.maxActive + ", maxWaitMillis = " + config.maxWait);
+    
     } // End of UpdateContextXml
     
     
@@ -232,6 +234,12 @@ public class TestMaxActive
     {
         int N = testScenarioParameters.threads; // Будем забирать количество потоков для запуска из параметров теста!
         
+         System.out.println("\n*******************************************************************************************************\n");
+         System.out.println("  Run test #: " + testScenarioParameters.number);
+         System.out.println("  Conditions: " + testScenarioParameters.name + "  .\n");
+         System.out.println("*******************************************************************************************************");
+         
+              
         HttpClient client = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(20)).build();
         String url = "http://localhost:8080/MyServletProject/MyServlet";
 
