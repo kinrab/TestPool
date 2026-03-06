@@ -5,7 +5,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.ParameterizedTest;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
-import io.qameta.allure.Description;
+import io.qameta.allure.Description; 
 
 import java.net.http.*;
 import java.net.URI;
@@ -78,14 +78,14 @@ public class TestMaxActive
     private static final List<TestConfig> SCENARIOS = 
             List.of(
                     //                Имя,                                                                                    Number    MaxActive,       MaxWait,     Sleep,  Threads,    ExpOk,    ExpFast,   ExpDelayed  ExpError
-//                    new TestConfig("Normal Wait   All: 4  MaxAct:2  OK:4 Fast:2 Delay:2 Error:0 MaxWait:  10000 Sleep:5000",    1,       2,            10000,      5000,     4,         4L,       2L,          2L,       0L   ), 
-//                    new TestConfig("Timeout Fail  All: 4  MaxAct:2  Ok:2 Fast:2 Delay:0 Error:2 MaxWait:   3000 Sleep:5000",    2,       2,             3000,      5000,     4,         2L,       2L,          0L,       2L   ),
-//                    new TestConfig("Stairway      All: 4  MaxAct:2  OK:4 Fast:1 Delay:3 Error:0 MaxWait:  30000 Sleep:5000",    3,       1,            30000,      5000,     4,         4L,       1L,          3L,       0L   ),                        
-//                    new TestConfig("Fast timeout  All: 4  MaxAct:2  OK:2 Fast:2 Delay:0 Error:2 MaxWait:    100 Sleep:5000",    4,       2,              100,      5000,     4,         2L,       2L,          0L,       2L   ),                        
-//                    new TestConfig("Wide gateway  All: 4  MaxAct:10 OK:4 Fast:4 Delay:0 Error:0 MaxWait: 100000 Sleep:5000",    5,      10,           100000,      5000,     4,         4L,       4L,          0L,       0L   ),
-//                    new TestConfig("Stairway 10   All:10  MaxAct:2  OK:6 Fast:2 Delay:4 Error:4 MaxWait:  14000 Sleep:5000",    6,       2,            14000,      5000,     10,        6L,       2L,          4L,       4L   ), 
-//                    new TestConfig("Border 10     All:10  MaxAct:2  OK:6 Fast:2 Delay:4 Error:4 MaxWait:  15000 Sleep:5000",    7,       2,            15000,      5000,     10,        6L,       2L,          4L,       4L   ),
-                    new TestConfig("Nothing       All:10  MaxAct:0  OK:0 Fast:10 Delay:0 Error:10 MaxWait:  1000 Sleep:5000",     8,       0,             1000,      5000,     10,        0L,       10L,         0L,       10L  )
+                    new TestConfig("Normal Wait   All: 4  MaxAct:2  OK:4 Fast:2 Delay:2 Error:0 MaxWait:  10000 Sleep:5000",    1,       2,            10000,      5000,     4,         4L,       2L,          2L,       0L   ), 
+                    new TestConfig("Timeout Fail  All: 4  MaxAct:2  Ok:2 Fast:2 Delay:0 Error:2 MaxWait:   3000 Sleep:5000",    2,       2,             3000,      5000,     4,         2L,       2L,          0L,       2L   ),
+                    new TestConfig("Stairway      All: 4  MaxAct:2  OK:4 Fast:1 Delay:3 Error:0 MaxWait:  30000 Sleep:5000",    3,       1,            30000,      5000,     4,         4L,       1L,          3L,       0L   ),                        
+                    new TestConfig("Fast timeout  All: 4  MaxAct:2  OK:2 Fast:2 Delay:0 Error:2 MaxWait:    100 Sleep:5000",    4,       2,              100,      5000,     4,         2L,       2L,          0L,       2L   ),                        
+                    new TestConfig("Wide gateway  All: 4  MaxAct:10 OK:4 Fast:4 Delay:0 Error:0 MaxWait: 100000 Sleep:5000",    5,      10,           100000,      5000,     4,         4L,       4L,          0L,       0L   ),
+                    new TestConfig("Stairway 10   All:10  MaxAct:2  OK:6 Fast:2 Delay:4 Error:4 MaxWait:  14000 Sleep:5000",    6,       2,            14000,      5000,     10,        6L,       2L,          4L,       4L   ), 
+                    new TestConfig("Border 10     All:10  MaxAct:2  OK:6 Fast:2 Delay:4 Error:4 MaxWait:  15000 Sleep:5000",    7,       2,            15000,      5000,     10,        6L,       2L,          4L,       4L   ),
+                    new TestConfig("Nothing       All:10  MaxAct:0  OK:0 Fast:10 Delay:0 Error:10 MaxWait: 1000 Sleep:5000",     8,       0,             1000,      5000,     10,        0L,       10L,         0L,       10L  )
 
             ); 
     
@@ -351,6 +351,8 @@ public class TestMaxActive
         // ШАГ 7: Логирование в отчет Allure и универсальные проверки Asserts
         Allure.step("7. Results checking (Assertions)", () -> 
         {
+           
+             System.out.println("\n======= ASSERT CHECKING: =======");
             // 0. ОБЪЯВЛЯЕМ переменные в начале блока, чтобы их видели все вложенные шаги
             final long sleep = testScenarioParameters.clientSleep / 1000; 
             final int maxActive = testScenarioParameters.maxActive;
@@ -368,11 +370,13 @@ public class TestMaxActive
             // 3. Проверка количества
             Allure.step("7.1 Проверка: Успешных ответов с данными (ожидаем " + testScenarioParameters.expectedOk + ")", () -> 
                 assertEquals(testScenarioParameters.expectedOk, realOkCount, "Кол-во чистых 200 не совпало!")
-            );
-
+            );  
+            System.out.println(testScenarioParameters.expectedOk == realOkCount ? "ASSERT 7.1: SUCCESS" : "ASSERT 7.1: ERROR!");    //Выведем сразу в консоль результат.
+                        
             Allure.step("7.2 Проверка: Отвалов пула (ожидаем " + testScenarioParameters.expectedError + ")", () -> 
                 assertEquals(testScenarioParameters.expectedError, realErrorCount, "Ожидаемые ошибки не найдены в ответах!")
             );
+            System.out.println(testScenarioParameters.expectedError == realErrorCount ? "ASSERT 7.2: SUCCESS" : "ASSERT 7.2: ERROR!");    //Выведем сразу в консоль результат.
 
             // 4. Лесенка времени (только для тех, где реально были данные)
             List<TestResult> sortedOkResults = results.stream()
@@ -380,23 +384,43 @@ public class TestMaxActive
                 .sorted(Comparator.comparingLong(r -> r.duration))
                 .collect(Collectors.toList());
 
-            for (int i = 0; i < sortedOkResults.size(); i++)  
-            {
-                final int requestIndex = i;
-                // Номер "волны" (0, 1, 2...), в которую попал запрос исходя из maxActive
-                int wave = i / maxActive; 
-                long expectedDuration = sleep * (wave + 1);
-
-                Allure.step("7.3 Проверка запроса в волне #" + (wave + 1) + " (ожидаем ~" + expectedDuration + "с)", () -> 
+            // 5. Если были позитивные результаты: 
+            if (sortedOkResults.size() > 0) 
+            {            
+                for (int i = 0; i < sortedOkResults.size(); i++)  
                 {
-                    long actualDuration = sortedOkResults.get(requestIndex).duration;
-                    assertTrue(Math.abs(actualDuration - expectedDuration) <= 1, 
-                        "Запрос #" + (requestIndex + 1) + " в очереди длился " + actualDuration + "с вместо " + expectedDuration + "с");
-                });
+                    final int requestIndex = i;
+                    // Номер "волны" (0, 1, 2...), в которую попал запрос исходя из maxActive
+                    int wave = i / maxActive; 
+                    long expectedDuration = sleep * (wave + 1);
+
+                    Allure.step("7.3."+ i +" Проверка запроса в волне #" + (wave + 1) + " (ожидаем ~" + expectedDuration + "с)", () -> 
+                    {
+                        long actualDuration = sortedOkResults.get(requestIndex).duration;
+                        assertTrue(Math.abs(actualDuration - expectedDuration) <= 1, 
+                            "Запрос #" + (requestIndex + 1) + " в очереди длился " + actualDuration + "с вместо " + expectedDuration + "с");
+
+                        // 1. Сначала вычисляем статус
+                        String status = (Math.abs(actualDuration - expectedDuration) <= 1) ? "SUCCESS" : "ERROR!";
+                        // 2. Затем печатаем
+                        System.out.println("ASSERT 7.3." + requestIndex + ": " + status);
+                    });
+                }
             }
+            else  // Если были ТОЛЬКО негативные результаты: 
+            {
+                Allure.step("7.3 Проверка: если только негативный результат - все отвалилось по таймауту", () -> 
+                assertEquals(testScenarioParameters.expectedOk, realOkCount, "Кол-во !")
+                );  
+                System.out.println("ASSERT 7.3: SUCCCESS. (only negative results expected)" );
+            }
+            
+            
+            
+            
         }); // Конец главного Allure.step
         
-        System.out.println("============ All steps have been completed. Wow! :-) ==================\n");
+        System.out.println("\n============ All steps have been completed. Wow! :-) ==================\n");
 
     } // End of test 
     
